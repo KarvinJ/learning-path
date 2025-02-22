@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends ScreenAdapter {
 
-    private final int SCREEN_WIDTH = Gdx.graphics.getWidth();;
+    private final int SCREEN_WIDTH = Gdx.graphics.getWidth();
     private final int SCREEN_HEIGHT = Gdx.graphics.getHeight();
     private final OrthographicCamera camera;
     private final ShapeRenderer shapeRenderer;
@@ -29,7 +29,7 @@ public class GameScreen extends ScreenAdapter {
     private final Rectangle mouseBounds;
     private Rectangle selectedCellBounds;
     private int selectedIndex = 0;
-    private boolean shouldDrawKana;
+    boolean shouldDrawBigKana;
 
     private final Array<Texture> kanas;
 
@@ -60,7 +60,7 @@ public class GameScreen extends ScreenAdapter {
 
         for(FileHandle file: files) {
 
-            kanas.add(new Texture(file));
+            kanas.add(new Texture(file.path()));
         }
     }
 
@@ -78,17 +78,6 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    void drawTextureGrid(SpriteBatch batch)
-    {
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                batch.draw(kanas.get(selectedIndex), selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
-            }
-        }
-    }
-
     private void drawGrid(ShapeRenderer shapeRenderer)
     {
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -98,6 +87,8 @@ public class GameScreen extends ScreenAdapter {
                 Rectangle actualCell = new Rectangle(column * CELL_SIZE + HORIZONTAL_OFFSET, row * CELL_SIZE + VERTICAL_OFFSET, CELL_SIZE - CELL_OFFSET, CELL_SIZE - CELL_OFFSET);
 
                 if (mouseBounds.overlaps(actualCell)) {
+
+                    shouldDrawBigKana = true;
 
                     shapeRenderer.setColor(Color.WHITE);
                     selectedCellBounds = actualCell;
@@ -109,7 +100,6 @@ public class GameScreen extends ScreenAdapter {
                 }
 
                 shapeRenderer.setColor(0.17f, 0.17f, 0.49f, 0);
-
                 shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
             }
         }
@@ -128,6 +118,9 @@ public class GameScreen extends ScreenAdapter {
             mouseBounds.y = worldCoordinates.y;
         }
 
+        Texture actualKana = kanas.get(selectedIndex);
+        Rectangle kanaBounds = new Rectangle(SCREEN_WIDTH / 2 + 80, SCREEN_HEIGHT / 2 - 40, actualKana.getWidth(), actualKana.getHeight());
+
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -135,12 +128,19 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.rect(selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
+
+        if (shouldDrawBigKana)
+            shapeRenderer.rect(kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
+
         shapeRenderer.end();
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        drawTextureGrid(batch);
+        if (shouldDrawBigKana)
+            batch.draw(actualKana, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
+
+        batch.draw(actualKana, selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
 
         batch.end();
     }
