@@ -2,6 +2,9 @@ package knight.nameless;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
+
+import java.awt.*;
 
 public class Kana {
 
@@ -9,6 +12,7 @@ public class Kana {
     public final Texture texture;
     public Sound sound;
     public int kanaIndex;
+    public Rectangle bounds;
 
     public Kana(String name, Texture texture, Sound sound) {
         this.name = name;
