@@ -30,9 +30,9 @@ public class GameScreen extends ScreenAdapter {
     private final int[][] grid;
     private final Array<Kana> kanas;
     private final Array<Kana> questions;
+    private final Array<Kana> alreadyCheckedKanas;
+    private final Array<String> alreadyCheckedKanaNames;
     private int questionIndex;
-    private int correctKanasQuantity;
-    private final Array<String> alreadyCheckedKanas;
 
     public GameScreen() {
 
@@ -48,7 +48,7 @@ public class GameScreen extends ScreenAdapter {
 
         initializeGrid();
 
-        alreadyCheckedKanas = new Array<>();
+        alreadyCheckedKanaNames = new Array<>();
 
         questions = new Array<>();
         loadQuestionsTexture(questions);
@@ -56,6 +56,8 @@ public class GameScreen extends ScreenAdapter {
 
         kanas = new Array<>();
         loadKanasTexture(kanas);
+
+        alreadyCheckedKanas = new Array<>();
     }
 
     private void loadQuestionsTexture(Array<Kana> questionsTexture) {
@@ -163,28 +165,9 @@ public class GameScreen extends ScreenAdapter {
                             selectedIndex = kanas.size - 1;
 
                         var selectedKana = kanas.get(selectedIndex);
-
                         selectedKana.sound.play();
 
-                        String[] kanasOfTheQuestion = actualQuestion.name.split(",");
-
-                        for (var kana : kanasOfTheQuestion) {
-
-                            if (!alreadyCheckedKanas.contains(kana, false) && kana.equals(selectedKana.name)) {
-
-                                Gdx.app.log("questionKana", kana);
-                                Gdx.app.log("selectedKana", selectedKana.name);
-                                Gdx.app.log("correct", String.valueOf(correctKanasQuantity));
-                                correctKanasQuantity++;
-                                alreadyCheckedKanas.add(kana);
-                            }
-                        }
-
-                        if (alreadyCheckedKanas.size == kanasOfTheQuestion.length) {
-
-                            questionIndex = MathUtils.random(0, questions.size - 1);
-                            alreadyCheckedKanas.clear();
-                        }
+                        checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana);
                     }
                 }
 
@@ -195,11 +178,40 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
+    private void checkIfSelectedKanaIsCorrect(Kana actualQuestion, Kana selectedKana) {
+
+        String[] kanasOfTheQuestion = actualQuestion.name.split(",");
+
+        int actualKanaIndex = 0;
+        for (var kana : kanasOfTheQuestion) {
+
+            if (!alreadyCheckedKanaNames.contains(kana, false) && kana.equals(selectedKana.name)) {
+
+                Gdx.app.log("questionKana", kana);
+                Gdx.app.log("selectedKana", selectedKana.name);
+                Gdx.app.log("correct", String.valueOf(alreadyCheckedKanaNames.size));
+                alreadyCheckedKanaNames.add(kana);
+
+                selectedKana.kanaIndex = actualKanaIndex;
+                alreadyCheckedKanas.add(selectedKana);
+            }
+
+            actualKanaIndex++;
+        }
+
+        if (alreadyCheckedKanaNames.size == kanasOfTheQuestion.length) {
+
+            questionIndex = MathUtils.random(0, questions.size - 1);
+            alreadyCheckedKanaNames.clear();
+            alreadyCheckedKanas.clear();
+        }
+    }
+
     @Override
     public void render(float delta) {
 
         Kana selectedKana = kanas.get(selectedIndex);
-        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 50, 180, 134);
+        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 90, 180, 134);
 
         Kana actualQuestion = questions.get(questionIndex);
 
@@ -218,13 +230,22 @@ public class GameScreen extends ScreenAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-
         batch.draw(actualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
 
         if (shouldDrawBigKana)
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
 
         batch.draw(selectedKana.texture, selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
+
+        Rectangle alreadyCheckBounds = new Rectangle((float) SCREEN_WIDTH / 2, 0, 128, 107);
+
+        for (Kana kana : alreadyCheckedKanas) {
+
+            float kanaPosition = kana.kanaIndex * alreadyCheckBounds.width;
+            kanaPosition-= 5;
+
+            batch.draw(kana.texture, alreadyCheckBounds.x + kanaPosition, alreadyCheckBounds.y, alreadyCheckBounds.width, alreadyCheckBounds.height);
+        }
 
         batch.end();
     }

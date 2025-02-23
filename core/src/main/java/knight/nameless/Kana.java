@@ -7,12 +7,19 @@ public class Kana {
 
     public final String name;
     public final Texture texture;
-    public final Sound sound;
+    public Sound sound;
+    public int kanaIndex;
 
     public Kana(String name, Texture texture, Sound sound) {
         this.name = name;
         this.texture = texture;
         this.sound = sound;
+    }
+
+    public Kana(String name, Texture texture, int kanaIndex) {
+        this.name = name;
+        this.texture = texture;
+        this.kanaIndex = kanaIndex;
     }
 
     public void dispose() {
