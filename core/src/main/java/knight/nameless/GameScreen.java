@@ -30,7 +30,7 @@ public class GameScreen extends ScreenAdapter {
     private final int[][] grid;
     private final Array<Kana> kanas;
     private final Array<Kana> questions;
-    private int questionIndex;
+    private final int questionIndex;
 
     public GameScreen() {
 
