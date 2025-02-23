@@ -3,10 +3,12 @@ package knight.nameless;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -19,17 +21,16 @@ public class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera;
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
-    private final int TOTAL_ROWS = 9;
-    private final int TOTAL_COLUMNS = 8;
     private final Rectangle mouseBounds;
     private Rectangle selectedCellBounds;
     private int selectedIndex = 0;
     private boolean shouldDrawBigKana;
-    private final Texture questionTexture;
-
-    private final Array<Kana> kanas;
-
+    private final int TOTAL_ROWS = 9;
+    private final int TOTAL_COLUMNS = 8;
     private final int[][] grid;
+    private final Array<Kana> kanas;
+    private final Array<Kana> questions;
+    private int questionIndex;
 
     public GameScreen() {
 
@@ -41,14 +42,34 @@ public class GameScreen extends ScreenAdapter {
         camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         selectedCellBounds = new Rectangle(SCREEN_WIDTH, 0, 0, 0);
-
         mouseBounds = new Rectangle(SCREEN_WIDTH, 0, 2, 2);
 
         initializeGrid();
 
+        questions = new Array<>();
+        loadQuestionsTexture(questions);
+        questionIndex = MathUtils.random(0, questions.size - 1);
+
         kanas = new Array<>();
         loadKanasTexture(kanas);
-        questionTexture = new Texture("img/questions/taiko.png");
+    }
+
+    private void loadQuestionsTexture(Array<Kana> questionsTexture) {
+
+        String baseImagePath = "img/questions/";
+        String imageExtension = ".jpg";
+
+        //use a map where I'm going to have the question normal name and the name separate by ,
+        String[] questions = new String[]{
+            "chikatetsu", "hinomaru", "houki", "kendou", "kimono",
+            "kuruma", "miko", "noren", "sentou", "shiro", "taiko", "tora"
+        };
+
+        for (String kanaName : questions) {
+
+            String actualImagePath = baseImagePath + kanaName + imageExtension;
+            questionsTexture.add(new Kana(kanaName, new Texture(actualImagePath), null));
+        }
     }
 
     private void loadKanasTexture(Array<Kana> kanas) {
@@ -132,15 +153,15 @@ public class GameScreen extends ScreenAdapter {
                         selectedCellBounds = actualCell;
                         selectedIndex = grid[row][column];
 
-                        if (selectedIndex > 70)
-                            selectedIndex = 70;
+                        if (selectedIndex == kanas.size)
+                            selectedIndex = kanas.size - 1;
 
                         kanas.get(selectedIndex).sound.play();
                     }
                 }
 
-//                shapeRenderer.setColor(Color.DARK_GRAY);
-                shapeRenderer.setColor(0.11f, 0.11f, 0.11f, 1);
+                shapeRenderer.setColor(Color.BLACK);
+//                shapeRenderer.setColor(0.11f, 0.11f, 0.11f, 1);
                 shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
             }
         }
@@ -149,14 +170,14 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
 
-        ScreenUtils.clear(0.78f, 0.78f, 0.78f, 1);
+        ScreenUtils.clear(Color.LIGHT_GRAY);
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         drawGrid(shapeRenderer);
 
-        shapeRenderer.setColor(0.78f, 0.78f, 0.78f, 1);
+        shapeRenderer.setColor(Color.LIGHT_GRAY);
         shapeRenderer.rect(selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
 
         shapeRenderer.end();
@@ -164,7 +185,9 @@ public class GameScreen extends ScreenAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        batch.draw(questionTexture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
+        Kana ActualQuestion = questions.get(questionIndex);
+
+        batch.draw(ActualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
 
         Texture actualKanaTexture = kanas.get(selectedIndex).texture;
         Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 50, 180, 134);
@@ -188,8 +211,7 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.dispose();
         batch.dispose();
 
-        for (Kana kana : kanas) {
+        for (Kana kana : kanas)
             kana.dispose();
-        }
     }
 }
