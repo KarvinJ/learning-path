@@ -3,7 +3,6 @@ package knight.nameless;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -22,10 +21,6 @@ public class GameScreen extends ScreenAdapter {
     private final SpriteBatch batch;
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 8;
-    private final int CELL_SIZE = 60;
-    private final int VERTICAL_OFFSET = 3;
-    private final int HORIZONTAL_OFFSET = 0;
-    private final int CELL_OFFSET = 3;
     private final Rectangle mouseBounds;
     private Rectangle selectedCellBounds;
     private int selectedIndex = 0;
@@ -53,7 +48,7 @@ public class GameScreen extends ScreenAdapter {
 
         kanas = new Array<>();
         loadKanasTexture(kanas);
-        questionTexture = new Texture("img/questions/sentou.png");
+        questionTexture = new Texture("img/questions/taiko.png");
     }
 
     private void loadKanasTexture(Array<Kana> kanas) {
@@ -107,11 +102,21 @@ public class GameScreen extends ScreenAdapter {
 
     private void drawGrid(ShapeRenderer shapeRenderer) {
 
+        int HORIZONTAL_OFFSET = 3;
+        int CELL_SIZE = 60;
+        int VERTICAL_OFFSET = 3;
+        int CELL_OFFSET = 3;
+
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
-                Rectangle actualCell = new Rectangle(column * CELL_SIZE + HORIZONTAL_OFFSET, row * CELL_SIZE + VERTICAL_OFFSET, CELL_SIZE - CELL_OFFSET, CELL_SIZE - CELL_OFFSET);
+                Rectangle actualCell = new Rectangle(
+                    column * CELL_SIZE + HORIZONTAL_OFFSET,
+                    row * CELL_SIZE + VERTICAL_OFFSET,
+                    CELL_SIZE - CELL_OFFSET,
+                    CELL_SIZE - CELL_OFFSET
+                );
 
                 if (Gdx.input.justTouched()) {
 
@@ -124,9 +129,7 @@ public class GameScreen extends ScreenAdapter {
 
                         shouldDrawBigKana = true;
 
-                        shapeRenderer.setColor(Color.WHITE);
                         selectedCellBounds = actualCell;
-
                         selectedIndex = grid[row][column];
 
                         if (selectedIndex > 70)
@@ -136,7 +139,8 @@ public class GameScreen extends ScreenAdapter {
                     }
                 }
 
-                shapeRenderer.setColor(0.17f, 0.17f, 0.49f, 0);
+//                shapeRenderer.setColor(Color.DARK_GRAY);
+                shapeRenderer.setColor(0.11f, 0.11f, 0.11f, 1);
                 shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
             }
         }
@@ -147,15 +151,12 @@ public class GameScreen extends ScreenAdapter {
 
         ScreenUtils.clear(0.78f, 0.78f, 0.78f, 1);
 
-        Texture actualKanaTexture = kanas.get(selectedIndex).texture;
-        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 120, 50, 180, 125);
-
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         drawGrid(shapeRenderer);
 
-        shapeRenderer.setColor(Color.WHITE);
+        shapeRenderer.setColor(0.78f, 0.78f, 0.78f, 1);
         shapeRenderer.rect(selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
 
         shapeRenderer.end();
@@ -163,7 +164,10 @@ public class GameScreen extends ScreenAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        batch.draw(questionTexture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, questionTexture.getWidth(), questionTexture.getHeight());
+        batch.draw(questionTexture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
+
+        Texture actualKanaTexture = kanas.get(selectedIndex).texture;
+        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 50, 180, 134);
 
         if (shouldDrawBigKana)
             batch.draw(actualKanaTexture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
@@ -180,7 +184,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        
+
         shapeRenderer.dispose();
         batch.dispose();
 
