@@ -5,12 +5,12 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class Kana {
 
-    public final String kanaName;
+    public final String name;
     public final Texture texture;
     public final Sound sound;
 
-    public Kana(String kanaName, Texture texture, Sound sound) {
-        this.kanaName = kanaName;
+    public Kana(String name, Texture texture, Sound sound) {
+        this.name = name;
         this.texture = texture;
         this.sound = sound;
     }

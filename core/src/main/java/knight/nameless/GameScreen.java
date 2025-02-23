@@ -23,14 +23,16 @@ public class GameScreen extends ScreenAdapter {
     private final SpriteBatch batch;
     private final Rectangle mouseBounds;
     private Rectangle selectedCellBounds;
-    private int selectedIndex = 0;
+    private int selectedIndex;
     private boolean shouldDrawBigKana;
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 8;
     private final int[][] grid;
     private final Array<Kana> kanas;
     private final Array<Kana> questions;
-    private final int questionIndex;
+    private int questionIndex;
+    private int correctKanasQuantity;
+    private final Array<String> alreadyCheckedKanas;
 
     public GameScreen() {
 
@@ -46,6 +48,8 @@ public class GameScreen extends ScreenAdapter {
 
         initializeGrid();
 
+        alreadyCheckedKanas = new Array<>();
+
         questions = new Array<>();
         loadQuestionsTexture(questions);
         questionIndex = MathUtils.random(0, questions.size - 1);
@@ -56,19 +60,21 @@ public class GameScreen extends ScreenAdapter {
 
     private void loadQuestionsTexture(Array<Kana> questionsTexture) {
 
-        String baseImagePath = "img/questions/";
-        String imageExtension = ".jpg";
-
-        //use a map where I'm going to have the question normal name and the name separate by ,
-        String[] questions = new String[]{
+        String[] questionsName = new String[]{
             "chikatetsu", "hinomaru", "houki", "kendou", "kimono",
             "kuruma", "miko", "noren", "sentou", "shiro", "taiko", "tora"
         };
 
-        for (String kanaName : questions) {
+        String[] separatedKanas = new String[]{
+            "chi,ka,te,tsu", "hi,no,ma,ru", "ho,u,ki", "ke,n,do,u", "ki,mo,no",
+            "ku,ru,ma", "mi,ko", "no,re,n", "se,n,to,u", "shi,ro", "ta,i,ko", "to,ra"
+        };
 
-            String actualImagePath = baseImagePath + kanaName + imageExtension;
-            questionsTexture.add(new Kana(kanaName, new Texture(actualImagePath), null));
+        for (int i = 0; i < questionsName.length; i++) {
+
+            var nameSeparatedInKanas = separatedKanas[i];
+            String actualImagePath = "img/questions/" + questionsName[i] + ".jpg";
+            questionsTexture.add(new Kana(nameSeparatedInKanas, new Texture(actualImagePath), null));
         }
     }
 
@@ -121,7 +127,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void drawGrid(ShapeRenderer shapeRenderer) {
+    private void drawGrid(ShapeRenderer shapeRenderer, Kana actualQuestion) {
 
         int HORIZONTAL_OFFSET = 3;
         int CELL_SIZE = 60;
@@ -156,7 +162,29 @@ public class GameScreen extends ScreenAdapter {
                         if (selectedIndex == kanas.size)
                             selectedIndex = kanas.size - 1;
 
-                        kanas.get(selectedIndex).sound.play();
+                        var selectedKana = kanas.get(selectedIndex);
+
+                        selectedKana.sound.play();
+
+                        String[] kanasOfTheQuestion = actualQuestion.name.split(",");
+
+                        for (var kana : kanasOfTheQuestion) {
+
+                            if (!alreadyCheckedKanas.contains(kana, false) && kana.equals(selectedKana.name)) {
+
+                                Gdx.app.log("questionKana", kana);
+                                Gdx.app.log("selectedKana", selectedKana.name);
+                                Gdx.app.log("correct", String.valueOf(correctKanasQuantity));
+                                correctKanasQuantity++;
+                                alreadyCheckedKanas.add(kana);
+                            }
+                        }
+
+                        if (alreadyCheckedKanas.size == kanasOfTheQuestion.length) {
+
+                            questionIndex = MathUtils.random(0, questions.size - 1);
+                            alreadyCheckedKanas.clear();
+                        }
                     }
                 }
 
@@ -170,12 +198,17 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
 
+        Kana selectedKana = kanas.get(selectedIndex);
+        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 50, 180, 134);
+
+        Kana actualQuestion = questions.get(questionIndex);
+
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        drawGrid(shapeRenderer);
+        drawGrid(shapeRenderer, actualQuestion);
 
         shapeRenderer.setColor(Color.LIGHT_GRAY);
         shapeRenderer.rect(selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
@@ -185,17 +218,13 @@ public class GameScreen extends ScreenAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        Kana ActualQuestion = questions.get(questionIndex);
 
-        batch.draw(ActualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
-
-        Texture actualKanaTexture = kanas.get(selectedIndex).texture;
-        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 50, 180, 134);
+        batch.draw(actualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
 
         if (shouldDrawBigKana)
-            batch.draw(actualKanaTexture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
+            batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
 
-        batch.draw(actualKanaTexture, selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
+        batch.draw(selectedKana.texture, selectedCellBounds.x, selectedCellBounds.y, selectedCellBounds.width, selectedCellBounds.height);
 
         batch.end();
     }
