@@ -16,12 +16,6 @@ public class Kana {
         this.sound = sound;
     }
 
-    public Kana(String name, Texture texture, int kanaIndex) {
-        this.name = name;
-        this.texture = texture;
-        this.kanaIndex = kanaIndex;
-    }
-
     public void dispose() {
 
         texture.dispose();
