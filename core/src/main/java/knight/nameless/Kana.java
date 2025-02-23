@@ -4,8 +4,6 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 
-import java.awt.*;
-
 public class Kana {
 
     public final String name;
