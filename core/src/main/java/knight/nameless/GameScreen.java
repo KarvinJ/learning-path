@@ -23,7 +23,6 @@ public class GameScreen extends ScreenAdapter {
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
     private final Rectangle mouseBounds;
-    private Rectangle selectedCellBounds;
     private int selectedIndex;
     private final Array<Kana> selectedKanas;
     private final int TOTAL_ROWS = 9;
@@ -48,7 +47,6 @@ public class GameScreen extends ScreenAdapter {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        selectedCellBounds = new Rectangle(SCREEN_WIDTH, 0, 0, 0);
         mouseBounds = new Rectangle(SCREEN_WIDTH, 0, 2, 2);
 
         initializeGrid();
@@ -137,6 +135,11 @@ public class GameScreen extends ScreenAdapter {
 
     private void drawGrid(ShapeRenderer shapeRenderer, Kana actualQuestion) {
 
+        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+
+        mouseBounds.x = worldCoordinates.x;
+        mouseBounds.y = worldCoordinates.y;
+
         int HORIZONTAL_OFFSET = 3;
         int CELL_SIZE = 60;
         int VERTICAL_OFFSET = 3;
@@ -153,45 +156,56 @@ public class GameScreen extends ScreenAdapter {
                     CELL_SIZE - CELL_OFFSET
                 );
 
-                if (Gdx.input.justTouched()) {
+                if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell)) {
 
-                    Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                    selectedIndex = grid[row][column];
 
-                    mouseBounds.x = worldCoordinates.x;
-                    mouseBounds.y = worldCoordinates.y;
+                    if (selectedIndex == kanas.size)
+                        selectedIndex = kanas.size - 1;
 
-                    if (mouseBounds.overlaps(actualCell)) {
+                    var selectedKana = kanas.get(selectedIndex);
+                    selectedKana.sound.play();
 
-                        selectedCellBounds = actualCell;
-                        selectedIndex = grid[row][column];
+                    selectedKana.bounds = actualCell;
 
-                        if (selectedIndex == kanas.size)
-                            selectedIndex = kanas.size - 1;
+                    boolean kanaIsAlreadyAdded = false;
+                    for (var kana : selectedKanas) {
 
-                        var selectedKana = kanas.get(selectedIndex);
-                        selectedKana.sound.play();
+                        if (kana.name.equals(selectedKana.name)) {
+                            kanaIsAlreadyAdded = true;
+                            break;
+                        }
+                    }
 
-                        selectedKana.bounds = selectedCellBounds;
+                    if (!kanaIsAlreadyAdded)
                         selectedKanas.add(selectedKana);
 
-                        if (shouldGoToNextQuestion) {
+                    Gdx.app.log("kanas size", String.valueOf(selectedKanas.size));
 
-                            shouldGoToNextQuestion = false;
-                            questionIndex = MathUtils.random(0, questions.size - 1);
-                            alreadyCheckedKanaNames.clear();
-                            alreadyCheckedKanas.clear();
-                            selectedKanas.clear();
-                            completeQuestionQuantity++;
-                        }
+                    if (shouldGoToNextQuestion) {
 
-                        checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana);
+                        shouldGoToNextQuestion = false;
+                        questionIndex = MathUtils.random(0, questions.size - 1);
+                        alreadyCheckedKanaNames.clear();
+                        alreadyCheckedKanas.clear();
+                        selectedKanas.clear();
+                        completeQuestionQuantity++;
                     }
+
+                    checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana);
                 }
 
                 shapeRenderer.setColor(Color.BLACK);
                 shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
             }
         }
+
+//        for (var kana : selectedKanas) {
+//
+//            if (Gdx.input.justTouched() && mouseBounds.overlaps(kana.bounds)) {
+//
+//            }
+//        }
     }
 
     private void checkIfSelectedKanaIsCorrect(Kana actualQuestion, Kana selectedKana) {
@@ -245,7 +259,7 @@ public class GameScreen extends ScreenAdapter {
 
         batch.draw(actualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
 
-        if (selectedCellBounds.x != SCREEN_WIDTH)
+        if (!selectedKanas.isEmpty())
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
 
         if (selectedKanas.size == 17)
