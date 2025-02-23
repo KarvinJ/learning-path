@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends ScreenAdapter {
 
+    private final Learning game;
     private final int SCREEN_WIDTH = Gdx.graphics.getWidth();
     private final int SCREEN_HEIGHT = Gdx.graphics.getHeight();
     private final OrthographicCamera camera;
@@ -34,8 +35,11 @@ public class GameScreen extends ScreenAdapter {
     private final Array<String> alreadyCheckedKanaNames;
     private int questionIndex;
     private boolean shouldGoToNextQuestion;
+    private int completeQuestionQuantity;
 
     public GameScreen() {
+
+        game = Learning.INSTANCE;
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
@@ -177,6 +181,7 @@ public class GameScreen extends ScreenAdapter {
                             alreadyCheckedKanaNames.clear();
                             alreadyCheckedKanas.clear();
                             selectedKanas.clear();
+                            completeQuestionQuantity++;
                         }
 
                         checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana);
@@ -243,6 +248,9 @@ public class GameScreen extends ScreenAdapter {
         if (selectedCellBounds.x != SCREEN_WIDTH)
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
 
+        if (selectedKanas.size == 17)
+            selectedKanas.clear();
+
         for (var kana : selectedKanas) {
 
             batch.draw(kana.texture, kana.bounds.x, kana.bounds.y, kana.bounds.width, kana.bounds.height);
@@ -259,6 +267,9 @@ public class GameScreen extends ScreenAdapter {
         }
 
         batch.end();
+
+        if (completeQuestionQuantity == 5)
+            game.setScreen(new MainMenuScreen());
     }
 
     @Override
