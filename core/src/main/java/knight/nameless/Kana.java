@@ -19,7 +19,6 @@ public class Kana {
     }
 
     public void dispose() {
-
         texture.dispose();
         sound.dispose();
     }

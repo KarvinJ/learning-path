@@ -25,7 +25,6 @@ public class GameScreen extends ScreenAdapter {
     private Rectangle selectedCellBounds;
     private int selectedIndex;
     private final Array<Kana> selectedKanas;
-    private boolean shouldDrawBigKana;
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 8;
     private final int[][] grid;
@@ -34,6 +33,7 @@ public class GameScreen extends ScreenAdapter {
     private final Array<Kana> alreadyCheckedKanas;
     private final Array<String> alreadyCheckedKanaNames;
     private int questionIndex;
+    private boolean shouldGoToNextQuestion;
 
     public GameScreen() {
 
@@ -158,8 +158,6 @@ public class GameScreen extends ScreenAdapter {
 
                     if (mouseBounds.overlaps(actualCell)) {
 
-                        shouldDrawBigKana = true;
-
                         selectedCellBounds = actualCell;
                         selectedIndex = grid[row][column];
 
@@ -172,18 +170,26 @@ public class GameScreen extends ScreenAdapter {
                         selectedKana.bounds = selectedCellBounds;
                         selectedKanas.add(selectedKana);
 
-                        checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana, selectedKanas);
+                        if (shouldGoToNextQuestion) {
+
+                            shouldGoToNextQuestion = false;
+                            questionIndex = MathUtils.random(0, questions.size - 1);
+                            alreadyCheckedKanaNames.clear();
+                            alreadyCheckedKanas.clear();
+                            selectedKanas.clear();
+                        }
+
+                        checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana);
                     }
                 }
 
                 shapeRenderer.setColor(Color.BLACK);
-//                shapeRenderer.setColor(0.11f, 0.11f, 0.11f, 1);
                 shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
             }
         }
     }
 
-    private void checkIfSelectedKanaIsCorrect(Kana actualQuestion, Kana selectedKana, Array<Kana> selectedKanas) {
+    private void checkIfSelectedKanaIsCorrect(Kana actualQuestion, Kana selectedKana) {
 
         String[] kanasOfTheQuestion = actualQuestion.name.split(",");
 
@@ -202,13 +208,8 @@ public class GameScreen extends ScreenAdapter {
             actualKanaIndex++;
         }
 
-        if (alreadyCheckedKanaNames.size == kanasOfTheQuestion.length) {
-
-            questionIndex = MathUtils.random(0, questions.size - 1);
-            alreadyCheckedKanaNames.clear();
-            alreadyCheckedKanas.clear();
-            selectedKanas.clear();
-        }
+        if (alreadyCheckedKanaNames.size == kanasOfTheQuestion.length)
+            shouldGoToNextQuestion = true;
     }
 
     @Override
@@ -239,7 +240,7 @@ public class GameScreen extends ScreenAdapter {
 
         batch.draw(actualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
 
-        if (shouldDrawBigKana)
+        if (selectedCellBounds.x != SCREEN_WIDTH)
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
 
         for (var kana : selectedKanas) {
