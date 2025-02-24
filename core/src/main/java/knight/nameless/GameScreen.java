@@ -30,10 +30,9 @@ public class GameScreen extends ScreenAdapter {
     private final int[][] grid;
     private final Array<Kana> kanas;
     private final Array<Kana> questions;
-    private final Array<Kana> alreadyCheckedKanas;
-    private final Array<String> alreadyCheckedKanaNames;
+    private final Array<Kana> correctKanas;
+    private final Array<String> correctKanaNames;
     private int questionIndex;
-    private boolean shouldGoToNextQuestion;
     private int completeQuestionQuantity;
 
     public GameScreen() {
@@ -51,7 +50,7 @@ public class GameScreen extends ScreenAdapter {
 
         initializeGrid();
 
-        alreadyCheckedKanaNames = new Array<>();
+        correctKanaNames = new Array<>();
 
         questions = new Array<>();
         loadQuestionsTexture(questions);
@@ -60,7 +59,7 @@ public class GameScreen extends ScreenAdapter {
         kanas = new Array<>();
         loadKanasTexture(kanas);
 
-        alreadyCheckedKanas = new Array<>();
+        correctKanas = new Array<>();
         selectedKanas = new Array<>();
     }
 
@@ -180,18 +179,6 @@ public class GameScreen extends ScreenAdapter {
                     if (!kanaIsAlreadyAdded)
                         selectedKanas.add(selectedKana);
 
-                    Gdx.app.log("kanas size", String.valueOf(selectedKanas.size));
-
-                    if (shouldGoToNextQuestion) {
-
-                        shouldGoToNextQuestion = false;
-                        questionIndex = MathUtils.random(0, questions.size - 1);
-                        alreadyCheckedKanaNames.clear();
-                        alreadyCheckedKanas.clear();
-                        selectedKanas.clear();
-                        completeQuestionQuantity++;
-                    }
-
                     checkIfSelectedKanaIsCorrect(actualQuestion, selectedKana);
                 }
 
@@ -200,12 +187,13 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
-//        for (var kana : selectedKanas) {
-//
-//            if (Gdx.input.justTouched() && mouseBounds.overlaps(kana.bounds)) {
-//
-//            }
-//        }
+        for (var kana : correctKanas) {
+
+            if (Gdx.input.isTouched() && mouseBounds.overlaps(kana.bounds)) {
+
+                kana.touchTiming++;
+            }
+        }
     }
 
     private void checkIfSelectedKanaIsCorrect(Kana actualQuestion, Kana selectedKana) {
@@ -216,19 +204,36 @@ public class GameScreen extends ScreenAdapter {
 
         for (var kana : kanasOfTheQuestion) {
 
-            if (!alreadyCheckedKanaNames.contains(kana, false) && kana.equals(selectedKana.name)) {
+            if (!correctKanaNames.contains(kana, false) && kana.equals(selectedKana.name)) {
 
-                alreadyCheckedKanaNames.add(kana);
+                correctKanaNames.add(kana);
 
                 selectedKana.kanaIndex = actualKanaIndex;
-                alreadyCheckedKanas.add(selectedKana);
+                selectedKana.touchTiming++;
+                correctKanas.add(selectedKana);
             }
 
             actualKanaIndex++;
         }
 
-        if (alreadyCheckedKanaNames.size == kanasOfTheQuestion.length)
-            shouldGoToNextQuestion = true;
+        boolean allKanasAreFound = true;
+        for (var correctKana : correctKanas) {
+
+            if (correctKana.touchTiming < 300) {
+
+                allKanasAreFound = false;
+                break;
+            }
+        }
+
+        if (allKanasAreFound && correctKanaNames.size == kanasOfTheQuestion.length) {
+
+            questionIndex = MathUtils.random(0, questions.size - 1);
+            correctKanaNames.clear();
+            correctKanas.clear();
+            selectedKanas.clear();
+            completeQuestionQuantity++;
+        }
     }
 
     @Override
@@ -262,9 +267,16 @@ public class GameScreen extends ScreenAdapter {
         if (!selectedKanas.isEmpty())
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
 
-        if (selectedKanas.size == 17)
+        if (selectedKanas.size == 17) {
+
             selectedKanas.clear();
 
+            for (var correctKana : correctKanas) {
+
+                if (correctKana.touchTiming > 300)
+                    selectedKanas.add(correctKana);
+            }
+        }
         for (var kana : selectedKanas) {
 
             batch.draw(kana.texture, kana.bounds.x, kana.bounds.y, kana.bounds.width, kana.bounds.height);
@@ -272,12 +284,15 @@ public class GameScreen extends ScreenAdapter {
 
         Rectangle alreadyCheckBounds = new Rectangle((float) SCREEN_WIDTH / 2, 0, 128, 107);
 
-        for (Kana kana : alreadyCheckedKanas) {
+        for (Kana kana : correctKanas) {
 
-            float kanaPosition = kana.kanaIndex * alreadyCheckBounds.width;
-            kanaPosition -= 5;
+            if (kana.touchTiming > 300) {
 
-            batch.draw(kana.texture, alreadyCheckBounds.x + kanaPosition, alreadyCheckBounds.y, alreadyCheckBounds.width, alreadyCheckBounds.height);
+                float kanaPosition = kana.kanaIndex * alreadyCheckBounds.width;
+                kanaPosition -= 5;
+
+                batch.draw(kana.texture, alreadyCheckBounds.x + kanaPosition, alreadyCheckBounds.y, alreadyCheckBounds.width, alreadyCheckBounds.height);
+            }
         }
 
         batch.end();

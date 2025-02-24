@@ -11,6 +11,7 @@ public class Kana {
     public Sound sound;
     public int kanaIndex;
     public Rectangle bounds;
+    public int touchTiming;
 
     public Kana(String name, Texture texture, Sound sound) {
         this.name = name;

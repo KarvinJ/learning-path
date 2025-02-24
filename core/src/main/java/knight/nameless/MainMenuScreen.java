@@ -58,14 +58,6 @@ public class MainMenuScreen extends ScreenAdapter {
             }
         });
 
-//        addButton(table, "Quit").addListener(new ClickListener() {
-//            @Override
-//            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-//                Gdx.app.exit();
-//                return super.touchDown(event, x, y, pointer, button);
-//            }
-//        });
-
         Gdx.input.setInputProcessor(stage);
 
         music = Gdx.audio.newMusic(Gdx.files.internal("music/peaceful.wav"));
