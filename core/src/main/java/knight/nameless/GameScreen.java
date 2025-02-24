@@ -227,7 +227,7 @@ public class GameScreen extends ScreenAdapter {
         boolean allKanasAreFound = true;
         for (var correctKana : correctKanas) {
 
-            if (correctKana.touchTiming < 300) {
+            if (correctKana.touchTiming < 150) {
 
                 allKanasAreFound = false;
                 break;
@@ -308,7 +308,7 @@ public class GameScreen extends ScreenAdapter {
 
             for (var correctKana : correctKanas) {
 
-                if (correctKana.touchTiming > 300)
+                if (correctKana.touchTiming > 150)
                     selectedKanas.add(correctKana);
             }
         }
@@ -321,7 +321,7 @@ public class GameScreen extends ScreenAdapter {
 
         for (Kana kana : correctKanas) {
 
-            if (kana.touchTiming > 300) {
+            if (kana.touchTiming > 150) {
 
                 float kanaPosition = kana.kanaIndex * alreadyCheckBounds.width;
                 kanaPosition -= 5;
