@@ -13,7 +13,6 @@ public class Learning extends Game {
 
     @Override
     public void create() {
-        setScreen(new MainMenuScreen());
-//        setScreen(new GameScreen());
+        setScreen(new MainMenuScreen(0));
     }
 }

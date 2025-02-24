@@ -7,8 +7,10 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -26,7 +28,7 @@ public class MainMenuScreen extends ScreenAdapter {
     private final Music music;
     public AssetDescriptor<Skin> uiSkin;
 
-    public MainMenuScreen() {
+    public MainMenuScreen(int score) {
 
         this.game = Learning.INSTANCE;
 
@@ -49,6 +51,20 @@ public class MainMenuScreen extends ScreenAdapter {
         table.setFillParent(true);
 
         stage.addActor(table);
+
+        int actualHighScore = score;
+
+        if (score < GameDataHelper.loadHighScore())
+            actualHighScore = GameDataHelper.loadHighScore();
+
+        Label titleLabel = new Label("Learning Path", new Label.LabelStyle(new BitmapFont(), Color.BLACK));
+        Label scoreLabel = new Label("High Score: " + actualHighScore, new Label.LabelStyle(new BitmapFont(), Color.BLACK));
+
+        table.add(titleLabel).expandX().padBottom(15);
+        table.row();
+
+        table.add(scoreLabel).expandX().padBottom(15);
+        table.row();
 
         addButton(table,"Play").addListener(new ClickListener() {
             @Override

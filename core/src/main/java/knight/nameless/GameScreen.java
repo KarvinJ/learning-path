@@ -15,6 +15,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import static knight.nameless.GameDataHelper.saveHighScore;
+
 public class GameScreen extends ScreenAdapter {
 
     private final Learning game;
@@ -330,8 +332,12 @@ public class GameScreen extends ScreenAdapter {
 
         batch.end();
 
-        if (completeQuestionQuantity == 5)
-            game.setScreen(new MainMenuScreen());
+        if (completeQuestionQuantity == 5) {
+
+            game.setScreen(new MainMenuScreen((int)score));
+
+            saveHighScore((int)score);
+        }
     }
 
     @Override
@@ -348,4 +354,6 @@ public class GameScreen extends ScreenAdapter {
         for (Kana kana : kanas)
             kana.dispose();
     }
+
+
 }
