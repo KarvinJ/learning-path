@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -22,6 +23,7 @@ public class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera;
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
+    private final BitmapFont font; //or use alex answer to use custom font
     private final Rectangle mouseBounds;
     private int selectedIndex;
     private final Array<Kana> selectedKanas;
@@ -34,11 +36,15 @@ public class GameScreen extends ScreenAdapter {
     private final Array<String> correctKanaNames;
     private int questionIndex;
     private int completeQuestionQuantity;
+    private float timer = 60;
+    private float score = 0;
+    private float attempts = 0;
 
     public GameScreen() {
 
         game = Learning.INSTANCE;
 
+        font = new BitmapFont();
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         grid = new int[TOTAL_ROWS][TOTAL_COLUMNS];
@@ -229,11 +235,22 @@ public class GameScreen extends ScreenAdapter {
         if (allKanasAreFound && correctKanaNames.size == kanasOfTheQuestion.length) {
 
             questionIndex = MathUtils.random(0, questions.size - 1);
-            correctKanaNames.clear();
-            correctKanas.clear();
-            selectedKanas.clear();
             completeQuestionQuantity++;
+            resetSelectedKanas();
+
+            score += timer;
+            score -= attempts;
+
+            attempts = 0;
+            timer = 60;
         }
+    }
+
+    private void resetSelectedKanas() {
+
+        correctKanaNames.clear();
+        correctKanas.clear();
+        selectedKanas.clear();
     }
 
     @Override
@@ -257,10 +274,26 @@ public class GameScreen extends ScreenAdapter {
             shapeRenderer.rect(kana.bounds.x, kana.bounds.y, kana.bounds.width, kana.bounds.height);
         }
 
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.rect((float) SCREEN_WIDTH / 2 + 42, 516, 32, 24);
+        shapeRenderer.rect((float) SCREEN_WIDTH - 78, 516, 32, 24);
+
         shapeRenderer.end();
+
+        if (timer > 0)
+            timer -= delta;
+        else {
+
+            attempts++;
+            timer = 60;
+            resetSelectedKanas();
+        }
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+
+        font.draw(batch, String.valueOf((int) timer), (float) SCREEN_WIDTH / 2 + 50, 535);
+        font.draw(batch, String.valueOf((int) score), (float) SCREEN_WIDTH - 74, 535);
 
         batch.draw(actualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
 
