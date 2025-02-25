@@ -25,7 +25,7 @@ public class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera;
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
-    private final BitmapFont font; //or use alex answer to use custom font
+    private final BitmapFont font;
     private final Rectangle mouseBounds;
     private int selectedIndex;
     private final Array<Kana> selectedKanas;
@@ -39,8 +39,8 @@ public class GameScreen extends ScreenAdapter {
     private int questionIndex;
     private int completeQuestionQuantity;
     private float timer = 60;
-    private float score = 0;
-    private float attempts = 0;
+    private float score;
+    private float attempts;
 
     public GameScreen() {
 
@@ -49,14 +49,17 @@ public class GameScreen extends ScreenAdapter {
         font = new BitmapFont();
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
+
         grid = new int[TOTAL_ROWS][TOTAL_COLUMNS];
 
+        initializeGrid(grid);
+
+        //if we want to make a game that use touch we need to have a camera and set this camera setToOrtho.
         camera = new OrthographicCamera();
+        //if we set viewport of the camera to SCREEN_WIDTH, SCREEN_HEIGHT, then there is no need to add .setProjectionMatrix to our batch.
         camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         mouseBounds = new Rectangle(SCREEN_WIDTH, 0, 2, 2);
-
-        initializeGrid();
 
         correctKanaNames = new Array<>();
 
@@ -127,7 +130,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void initializeGrid() {
+    private void initializeGrid(int[][] grid) {
 
         int index = 0;
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -147,10 +150,10 @@ public class GameScreen extends ScreenAdapter {
         mouseBounds.x = worldCoordinates.x;
         mouseBounds.y = worldCoordinates.y;
 
-        int HORIZONTAL_OFFSET = 3;
-        int CELL_SIZE = 60;
-        int VERTICAL_OFFSET = 3;
-        int CELL_OFFSET = 3;
+        final int HORIZONTAL_OFFSET = 3;
+        final int CELL_SIZE = 60;
+        final int VERTICAL_OFFSET = 3;
+        final int CELL_OFFSET = 3;
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
@@ -265,7 +268,8 @@ public class GameScreen extends ScreenAdapter {
 
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
-        shapeRenderer.setProjectionMatrix(camera.combined);
+        //No needed because the camera was setToOrtho with the width and height of the screen.
+//        shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         drawGrid(shapeRenderer, actualQuestion);
@@ -334,9 +338,8 @@ public class GameScreen extends ScreenAdapter {
 
         if (completeQuestionQuantity == 5) {
 
-            game.setScreen(new MainMenuScreen((int)score));
-
             saveHighScore((int)score);
+            game.setScreen(new MainMenuScreen((int)score));
         }
     }
 
@@ -354,6 +357,4 @@ public class GameScreen extends ScreenAdapter {
         for (Kana kana : kanas)
             kana.dispose();
     }
-
-
 }
