@@ -14,15 +14,17 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import static knight.nameless.GameDataHelper.saveHighScore;
 
 public class GameScreen extends ScreenAdapter {
 
     private final Learning game;
-    private final int SCREEN_WIDTH = Gdx.graphics.getWidth();
-    private final int SCREEN_HEIGHT = Gdx.graphics.getHeight();
+    private final int SCREEN_WIDTH = 960;
+    private final int SCREEN_HEIGHT = 544;
     private final OrthographicCamera camera;
+    private final FitViewport viewport;
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
     private final BitmapFont font;
@@ -57,7 +59,11 @@ public class GameScreen extends ScreenAdapter {
         //if we want to make a game that use touch we need to have a camera and set this camera setToOrtho.
         camera = new OrthographicCamera();
         //if we set viewport of the camera to SCREEN_WIDTH, SCREEN_HEIGHT, then there is no need to add .setProjectionMatrix to our batch.
-        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
+//        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        viewport = new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
+
+        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
 
         mouseBounds = new Rectangle(SCREEN_WIDTH, 0, 2, 2);
 
@@ -92,6 +98,11 @@ public class GameScreen extends ScreenAdapter {
             String actualImagePath = "img/questions/" + questionsName[i] + ".jpg";
             questionsTexture.add(new Kana(nameSeparatedInKanas, new Texture(actualImagePath), null));
         }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
     }
 
     private void loadKanasTexture(Array<Kana> kanas) {
@@ -266,10 +277,12 @@ public class GameScreen extends ScreenAdapter {
 
         Kana actualQuestion = questions.get(questionIndex);
 
+        camera.update();
+
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
         //No needed because the camera was setToOrtho with the width and height of the screen.
-//        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         drawGrid(shapeRenderer, actualQuestion);
