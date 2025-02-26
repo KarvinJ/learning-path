@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import static knight.nameless.GameDataHelper.saveHighScore;
 
@@ -24,7 +24,7 @@ public class GameScreen extends ScreenAdapter {
     private final int SCREEN_WIDTH = 960;
     private final int SCREEN_HEIGHT = 544;
     private final OrthographicCamera camera;
-    private final FitViewport viewport;
+    private final ExtendViewport viewport;
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
     private final BitmapFont font;
@@ -56,12 +56,12 @@ public class GameScreen extends ScreenAdapter {
 
         initializeGrid(grid);
 
-        //if we want to make a game that use touch we need to have a camera and set this camera setToOrtho.
+        //if we want to make a game that use touch we need to have a camera and set this camera to ortho if we aren't using viewports
         camera = new OrthographicCamera();
         //if we set viewport of the camera to SCREEN_WIDTH, SCREEN_HEIGHT, then there is no need to add .setProjectionMatrix to our batch.
 //        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        viewport = new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
+        viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
 
@@ -264,8 +264,12 @@ public class GameScreen extends ScreenAdapter {
 
     private void resetSelectedKanas() {
 
-        correctKanaNames.clear();
+        //resetting all touchTiming to 0 to avoid 1 click reveal in next rounds.
+        for (var kana : correctKanas)
+            kana.touchTiming = 0;
+
         correctKanas.clear();
+        correctKanaNames.clear();
         selectedKanas.clear();
     }
 
@@ -277,11 +281,8 @@ public class GameScreen extends ScreenAdapter {
 
         Kana actualQuestion = questions.get(questionIndex);
 
-        camera.update();
-
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
-        //No needed because the camera was setToOrtho with the width and height of the screen.
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
