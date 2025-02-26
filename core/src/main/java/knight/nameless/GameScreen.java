@@ -58,7 +58,7 @@ public class GameScreen extends ScreenAdapter {
 
         //if we want to make a game that use touch we need to have a camera and set this camera to ortho if we aren't using viewports
         camera = new OrthographicCamera();
-        //if we set viewport of the camera to SCREEN_WIDTH, SCREEN_HEIGHT, then there is no need to add .setProjectionMatrix to our batch.
+        //if we set viewport of the camera to SCREEN_WIDTH, SCREEN_HEIGHT, then we don't need to use .setProjectionMatrix in our batch.
 //        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
@@ -211,10 +211,8 @@ public class GameScreen extends ScreenAdapter {
 
         for (var kana : correctKanas) {
 
-            if (Gdx.input.isTouched() && mouseBounds.overlaps(kana.bounds)) {
-
+            if (Gdx.input.isTouched() && mouseBounds.overlaps(kana.bounds))
                 kana.touchTiming++;
-            }
         }
     }
 
@@ -283,6 +281,7 @@ public class GameScreen extends ScreenAdapter {
 
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
+        //the .setProjectionMatrix is EXTREMELY necessary, when working with viewports, without this any viewport is useless.
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -309,6 +308,8 @@ public class GameScreen extends ScreenAdapter {
             resetSelectedKanas();
         }
 
+        //To every batch and shapeRenderer that I have I also need to set setProjectionMatrix,
+        // it feels unnecessary, but if I don't set the ProjectionMatrix with every batch or shapeRenderer the viewport won't work.
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
