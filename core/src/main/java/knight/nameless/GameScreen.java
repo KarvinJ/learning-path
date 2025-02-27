@@ -21,8 +21,8 @@ import static knight.nameless.GameDataHelper.saveHighScore;
 public class GameScreen extends ScreenAdapter {
 
     private final Learning game;
-    private final int SCREEN_WIDTH = 960;
-    private final int SCREEN_HEIGHT = 544;
+    private final int SCREEN_WIDTH = 1280;
+    private final int SCREEN_HEIGHT = 720;
     private final OrthographicCamera camera;
     private final ExtendViewport viewport;
     private final ShapeRenderer shapeRenderer;
@@ -162,7 +162,7 @@ public class GameScreen extends ScreenAdapter {
         mouseBounds.y = worldCoordinates.y;
 
         final int HORIZONTAL_OFFSET = 3;
-        final int CELL_SIZE = 60;
+        final int CELL_SIZE = 80;
         final int VERTICAL_OFFSET = 3;
         final int CELL_OFFSET = 3;
 
@@ -274,16 +274,13 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
 
-        Kana selectedKana = kanas.get(selectedIndex);
-        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 150, 90, 180, 134);
-
-        Kana actualQuestion = questions.get(questionIndex);
-
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
         //the .setProjectionMatrix is EXTREMELY necessary, when working with viewports, without this any viewport is useless.
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        Kana actualQuestion = questions.get(questionIndex);
 
         drawGrid(shapeRenderer, actualQuestion);
 
@@ -294,8 +291,8 @@ public class GameScreen extends ScreenAdapter {
         }
 
         shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.rect((float) SCREEN_WIDTH / 2 + 42, 516, 32, 24);
-        shapeRenderer.rect((float) SCREEN_WIDTH - 78, 516, 32, 24);
+        shapeRenderer.rect((float) SCREEN_WIDTH / 2 + 72, SCREEN_HEIGHT - 39, 32, 24);
+        shapeRenderer.rect((float) SCREEN_WIDTH - 95, SCREEN_HEIGHT - 39, 32, 24);
 
         shapeRenderer.end();
 
@@ -313,10 +310,19 @@ public class GameScreen extends ScreenAdapter {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        font.draw(batch, String.valueOf((int) timer), (float) SCREEN_WIDTH / 2 + 50, 535);
-        font.draw(batch, String.valueOf((int) score), (float) SCREEN_WIDTH - 74, 535);
+        font.draw(batch, String.valueOf((int) timer), (float) SCREEN_WIDTH / 2 + 80, SCREEN_HEIGHT - 20);
+        font.draw(batch, String.valueOf((int) score), (float) SCREEN_WIDTH - 90, SCREEN_HEIGHT - 20);
 
-        batch.draw(actualQuestion.texture, (float) SCREEN_WIDTH / 2 + 125, (float) SCREEN_HEIGHT / 2 - 50, 228, 320);
+        batch.draw(
+            actualQuestion.texture,
+            (float) SCREEN_WIDTH / 2 + actualQuestion.texture.getWidth() / 2f + 20,
+            (float) SCREEN_HEIGHT / 2 - 80,
+            actualQuestion.texture.getWidth(),
+            actualQuestion.texture.getHeight()
+        );
+
+        Kana selectedKana = kanas.get(selectedIndex);
+        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 250, 134, 160, 134);
 
         if (!selectedKanas.isEmpty())
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
@@ -336,7 +342,7 @@ public class GameScreen extends ScreenAdapter {
             batch.draw(kana.texture, kana.bounds.x, kana.bounds.y, kana.bounds.width, kana.bounds.height);
         }
 
-        Rectangle alreadyCheckBounds = new Rectangle((float) SCREEN_WIDTH / 2, 0, 128, 107);
+        Rectangle alreadyCheckBounds = new Rectangle((float) SCREEN_WIDTH / 2, 0, kanaBounds.width, kanaBounds.height);
 
         for (Kana kana : correctKanas) {
 
@@ -353,8 +359,8 @@ public class GameScreen extends ScreenAdapter {
 
         if (completeQuestionQuantity == 5) {
 
-            saveHighScore((int)score);
-            game.setScreen(new MainMenuScreen((int)score));
+            saveHighScore((int) score);
+            game.setScreen(new MainMenuScreen((int) score));
         }
     }
 
