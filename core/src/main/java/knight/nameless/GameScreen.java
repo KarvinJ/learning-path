@@ -28,17 +28,16 @@ public class GameScreen extends ScreenAdapter {
     private final ShapeRenderer shapeRenderer;
     private final SpriteBatch batch;
     private final BitmapFont font;
-    private final Rectangle mouseBounds;
-    private int selectedIndex;
+    private final Array<Kana> kanas;
     private final Array<Kana> selectedKanas;
+    private final Array<Kana> correctKanas;
+    private final Array<String> correctKanaNames;
+    private final Array<Kana> questions;
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 8;
     private final int[][] grid;
-    private final Array<Kana> kanas;
-    private final Array<Kana> questions;
-    private final Array<Kana> correctKanas;
-    private final Array<String> correctKanaNames;
     private int questionIndex;
+    private int selectedIndex;
     private int completeQuestionQuantity;
     private float timer = 60;
     private float score;
@@ -64,8 +63,6 @@ public class GameScreen extends ScreenAdapter {
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
-
-        mouseBounds = new Rectangle(SCREEN_WIDTH, 0, 2, 2);
 
         correctKanaNames = new Array<>();
 
@@ -94,9 +91,21 @@ public class GameScreen extends ScreenAdapter {
 
         for (int i = 0; i < questionsName.length; i++) {
 
-            var nameSeparatedInKanas = separatedKanas[i];
             String actualImagePath = "img/questions/" + questionsName[i] + ".jpg";
-            questionsTexture.add(new Kana(nameSeparatedInKanas, new Texture(actualImagePath), null));
+
+            var questionTexture = new Texture(actualImagePath);
+
+            var questionBounds = new Rectangle(
+                (float) SCREEN_WIDTH / 2 + questionTexture.getWidth() / 2f + 20,
+                (float) SCREEN_HEIGHT / 2 - 80,
+                questionTexture.getWidth(),
+                questionTexture.getHeight()
+            );
+
+            var nameSeparatedInKanas = separatedKanas[i];
+            var actualQuestion = new Kana(nameSeparatedInKanas, new Texture(actualImagePath), null);
+            actualQuestion.bounds = questionBounds;
+            questionsTexture.add(actualQuestion);
         }
     }
 
@@ -158,8 +167,7 @@ public class GameScreen extends ScreenAdapter {
 
         Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
 
-        mouseBounds.x = worldCoordinates.x;
-        mouseBounds.y = worldCoordinates.y;
+        var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
         final int HORIZONTAL_OFFSET = 3;
         final int CELL_SIZE = 80;
@@ -281,7 +289,6 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         Kana actualQuestion = questions.get(questionIndex);
-
         drawGrid(shapeRenderer, actualQuestion);
 
         shapeRenderer.setColor(Color.LIGHT_GRAY);
@@ -315,14 +322,12 @@ public class GameScreen extends ScreenAdapter {
 
         batch.draw(
             actualQuestion.texture,
-            (float) SCREEN_WIDTH / 2 + actualQuestion.texture.getWidth() / 2f + 20,
-            (float) SCREEN_HEIGHT / 2 - 80,
-            actualQuestion.texture.getWidth(),
-            actualQuestion.texture.getHeight()
+            actualQuestion.bounds.x, actualQuestion.bounds.y,
+            actualQuestion.bounds.width, actualQuestion.bounds.height
         );
 
         Kana selectedKana = kanas.get(selectedIndex);
-        Rectangle kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 250, 134, 160, 134);
+        var kanaBounds = new Rectangle((float) SCREEN_WIDTH / 2 + 250, 134, 160, 134);
 
         if (!selectedKanas.isEmpty())
             batch.draw(selectedKana.texture, kanaBounds.x, kanaBounds.y, kanaBounds.width, kanaBounds.height);
@@ -342,7 +347,7 @@ public class GameScreen extends ScreenAdapter {
             batch.draw(kana.texture, kana.bounds.x, kana.bounds.y, kana.bounds.width, kana.bounds.height);
         }
 
-        Rectangle alreadyCheckBounds = new Rectangle((float) SCREEN_WIDTH / 2, 0, kanaBounds.width, kanaBounds.height);
+        var alreadyCheckBounds = new Rectangle((float) SCREEN_WIDTH / 2, 0, kanaBounds.width, kanaBounds.height);
 
         for (Kana kana : correctKanas) {
 
@@ -374,8 +379,12 @@ public class GameScreen extends ScreenAdapter {
 
         shapeRenderer.dispose();
         batch.dispose();
+        font.dispose();
 
         for (Kana kana : kanas)
             kana.dispose();
+
+        for (Kana question : questions)
+            question.dispose();
     }
 }

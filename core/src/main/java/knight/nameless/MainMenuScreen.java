@@ -30,43 +30,35 @@ public class MainMenuScreen extends ScreenAdapter {
 
     public MainMenuScreen(int score) {
 
-        this.game = Learning.INSTANCE;
+        game = Learning.INSTANCE;
 
         uiSkin = new AssetDescriptor<>("ui/uiskin.json", Skin.class, new SkinLoader.SkinParameter("ui/uiskin.atlas"));
 
         AssetManager assetManager = new AssetManager();
-
         assetManager.load(uiSkin);
-
         assetManager.finishLoading();
 
         skin = assetManager.get(uiSkin);
 
-        viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
+        viewport = new ExtendViewport(1280, 720);
         stage = new Stage(viewport);
 
         Table table = new Table();
-
         table.setFillParent(true);
 
         stage.addActor(table);
 
-        int actualHighScore = score;
-
-        if (score < GameDataHelper.loadHighScore())
-            actualHighScore = GameDataHelper.loadHighScore();
-
         Label titleLabel = new Label("Learning Path", new Label.LabelStyle(new BitmapFont(), Color.BLACK));
-        Label scoreLabel = new Label("High Score: " + actualHighScore, new Label.LabelStyle(new BitmapFont(), Color.BLACK));
-
         table.add(titleLabel).expandX().padBottom(15);
         table.row();
 
+        int actualHighScore = Math.max(score, GameDataHelper.loadHighScore());
+
+        Label scoreLabel = new Label("High Score: " + actualHighScore, new Label.LabelStyle(new BitmapFont(), Color.BLACK));
         table.add(scoreLabel).expandX().padBottom(15);
         table.row();
 
-        addButton(table,"Play").addListener(new ClickListener() {
+        addButton(table).addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 game.setScreen(new GameScreen());
@@ -83,9 +75,9 @@ public class MainMenuScreen extends ScreenAdapter {
         music.setLooping(true);
     }
 
-    private TextButton addButton(Table table, String buttonName) {
+    private TextButton addButton(Table table) {
 
-        TextButton textButton = new TextButton(buttonName, skin);
+        TextButton textButton = new TextButton("PLAY", skin);
 
         table.add(textButton).width(400).height(60).padBottom(15);
         table.row();

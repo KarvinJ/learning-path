@@ -9,8 +9,8 @@ public class Kana {
     public final String name;
     public final Texture texture;
     public Sound sound;
-    public int kanaIndex;
     public Rectangle bounds;
+    public int kanaIndex;
     public int touchTiming;
 
     public Kana(String name, Texture texture, Sound sound) {
@@ -20,7 +20,10 @@ public class Kana {
     }
 
     public void dispose() {
+
         texture.dispose();
-        sound.dispose();
+
+        if (sound != null)
+            sound.dispose();
     }
 }
