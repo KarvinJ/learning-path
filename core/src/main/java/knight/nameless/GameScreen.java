@@ -59,10 +59,9 @@ public class GameScreen extends ScreenAdapter {
         camera = new OrthographicCamera();
         //if we set viewport of the camera to SCREEN_WIDTH, SCREEN_HEIGHT, then we don't need to use .setProjectionMatrix in our batch.
 //        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
+        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
 
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
-
-        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
 
         correctKanaNames = new Array<>();
 
