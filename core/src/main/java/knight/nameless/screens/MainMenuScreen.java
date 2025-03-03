@@ -1,4 +1,4 @@
-package knight.nameless;
+package knight.nameless.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -18,6 +18,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import knight.nameless.GameDataHelper;
+import knight.nameless.Learning;
 
 public class MainMenuScreen extends ScreenAdapter {
 
@@ -71,7 +74,7 @@ public class MainMenuScreen extends ScreenAdapter {
         music = Gdx.audio.newMusic(Gdx.files.internal("music/peaceful.wav"));
 
         music.play();
-        music.setVolume(0.4f);
+        music.setVolume(0.2f);
         music.setLooping(true);
     }
 

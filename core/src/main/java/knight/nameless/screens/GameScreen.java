@@ -1,7 +1,8 @@
-package knight.nameless;
+package knight.nameless.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -17,6 +18,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import static knight.nameless.GameDataHelper.saveHighScore;
+
+import knight.nameless.Kana;
+import knight.nameless.Learning;
 
 public class GameScreen extends ScreenAdapter {
 
@@ -42,6 +46,7 @@ public class GameScreen extends ScreenAdapter {
     private float timer = 60;
     private float score;
     private float attempts;
+    private final Music music;
 
     public GameScreen() {
 
@@ -74,6 +79,11 @@ public class GameScreen extends ScreenAdapter {
 
         correctKanas = new Array<>();
         selectedKanas = new Array<>();
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/peaceful.wav"));
+
+        music.play();
+        music.setVolume(0.2f);
+        music.setLooping(true);
     }
 
     private void loadQuestionsTexture(Array<Kana> questionsTexture) {
@@ -379,6 +389,7 @@ public class GameScreen extends ScreenAdapter {
         shapeRenderer.dispose();
         batch.dispose();
         font.dispose();
+        music.dispose();
 
         for (Kana kana : kanas)
             kana.dispose();
